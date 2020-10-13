@@ -13,6 +13,8 @@ def main():
     
     request_queue_url = client.get_queue_url(QueueName='request_queue')['QueueUrl']
     response_queue_url = client.get_queue_url(QueueName='response_queue')['QueueUrl']
+    print("Julien's worker script. Calculates the average of any list of values sent")
+    print("through Amazon SQS. (Press Ctrl+Z to quit at any time)\n")
     print("Request queue URL: " + request_queue_url)
     print("Response queue URL: " + response_queue_url)
     print('')
