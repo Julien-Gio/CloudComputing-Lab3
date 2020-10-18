@@ -8,11 +8,12 @@ from datetime import datetime
 
 
 def main():
-    global client
-    client = boto3.client('sqs')
+    global clientSQS, clientS3
+    clientSQS = boto3.client('sqs')
+    clientS3 = boto3.client('s3')
     
-    request_queue_url = client.get_queue_url(QueueName='request_queue')['QueueUrl']
-    response_queue_url = client.get_queue_url(QueueName='response_queue')['QueueUrl']
+    request_queue_url = clientSQS.get_queue_url(QueueName='request_queue')['QueueUrl']
+    response_queue_url = clientSQS.get_queue_url(QueueName='response_queue')['QueueUrl']
     print("Julien's worker script. Calculates the average of any list of values sent")
     print("through Amazon SQS. (Press Ctrl+Z to quit at any time)\n")
     print("Request queue URL: " + request_queue_url)
@@ -26,14 +27,12 @@ def main():
             just_processed_messages = False
             print("Waiting for messages...")
         
-        messages = client.receive_message(
+        messages = clientSQS.receive_message(
             QueueUrl=request_queue_url,
             MaxNumberOfMessages=10
         )
         if 'Messages' in messages:
             for message in messages['Messages']: # Get the messages in queue
-                print("Msg received @ " + datetime.now().strftime("%H:%M:%S") +
-                      ": " + message['Body'], end="\n\n")
                 body = message['Body']
 
                 # Process data
@@ -46,16 +45,31 @@ def main():
                 send_msg(response_queue_url, str(average))
                 
                 # Delete the message from the queue as to not process it again
-                client.delete_message(
+                clientSQS.delete_message(
                     QueueUrl=request_queue_url,
                     ReceiptHandle=message['ReceiptHandle']
                 )
+
+                # Get log file from S3
+                clientS3.download_file('julgio-cli-bucket', 'log.txt', 'log.txt')
+
+                # Update log
+                with open('log.txt', 'a') as f:
+                    f.write("Msg received @ " + datetime.now().strftime("%H:%M:%S") +
+                      ": " + message['Body'] + ". Response => " + str(average) + "\n")
+                
+                with open('log.txt', 'r') as f:
+                    print(f.read())
+                
+                # Push log on S3 bucket
+                clientS3.upload_file('log.txt', 'julgio-cli-bucket', 'log.txt')
+                
             just_processed_messages = True
             
 
 
 def send_msg(queue_url, msg):
-    sqs_response = client.send_message(
+    sqs_response = clientSQS.send_message(
         QueueUrl=queue_url,
         MessageBody=msg
     )
