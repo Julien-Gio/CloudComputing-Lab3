@@ -9,12 +9,12 @@ from guietta import Gui, _, III
 
 
 def main():
-    global client, request_queue_url, response_queue_url
-    client = boto3.client('sqs')
+    global clientSQS, request_queue_url, response_queue_url
+    clientSQS = boto3.client('sqs')
 
     # Get the queue urls
-    request_queue_url = client.get_queue_url(QueueName='request_queue')['QueueUrl']
-    response_queue_url = client.get_queue_url(QueueName='response_queue')['QueueUrl']
+    request_queue_url = clientSQS.get_queue_url(QueueName='request_queue')['QueueUrl']
+    response_queue_url = clientSQS.get_queue_url(QueueName='response_queue')['QueueUrl']
     print("Request queue URL: " + request_queue_url)
     print("Response queue URL: " + response_queue_url)
     print('')
@@ -30,7 +30,7 @@ def main():
     # Handle ui events
     while True:
         name, event = gui.get()
-        print(name, event)
+        
         if name == None:
             # The user pressed the X (quits the app)
             break
@@ -52,7 +52,7 @@ def main():
     
 
 def send_msg(queue_url, msg):
-    sqs_response = client.send_message(
+    sqs_response = clientSQS.send_message(
         QueueUrl=queue_url,
         MessageBody=msg
     )
@@ -62,7 +62,7 @@ def wait_for_response(queue_url):
     print("Waiting for response...")
     
     while True:
-        sqs_response = client.receive_message(
+        sqs_response = clientSQS.receive_message(
             QueueUrl=queue_url,
             MaxNumberOfMessages=1,
             MessageAttributeNames=['All']
@@ -73,7 +73,7 @@ def wait_for_response(queue_url):
             print("Response @ " + datetime.now().strftime("%H:%M:%S") +
                   ": " + message['Body'])
 
-            client.delete_message(
+            clientSQS.delete_message(
                 QueueUrl=queue_url,
                 ReceiptHandle=message['ReceiptHandle']
             )
