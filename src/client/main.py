@@ -4,20 +4,18 @@
 # Client side of the Web Queue Worker architecture
 
 import boto3
+import time
 from datetime import datetime
 from guietta import Gui, _, III
 
 
 def main():
-    global clientSQS, request_queue_url, response_queue_url
-    clientSQS = boto3.client('sqs')
-
+    sqs = boto3.resource('sqs')
+    
     # Get the queue urls
-    request_queue_url = clientSQS.get_queue_url(QueueName='request_queue')['QueueUrl']
-    response_queue_url = clientSQS.get_queue_url(QueueName='response_queue')['QueueUrl']
-    print("Request queue URL: " + request_queue_url)
-    print("Response queue URL: " + response_queue_url)
-    print('')
+    request_queue = sqs.get_queue_by_name(QueueName='request_queue')
+    response_queue = sqs.get_queue_by_name(QueueName='response_queue')
+    print('AWS connection done. Starting application...')
 
     gui = Gui([ "Enter numbers:", "__n1__"  , "__n2__", "__n3__", "__n4__", ["Go"] ],
               [ III             , "__n5__"  , "__n6__", "__n7__", "__n8__", III    ],
@@ -35,51 +33,52 @@ def main():
             # The user pressed the X (quits the app)
             break
         if name == 'Go':  # Calcuate the result
+            # Fetch the values from the interface
             # The message must be comma seperated values
             message = str(gui.n1) + "," + str(gui.n2) + "," + str(gui.n3) + "," +\
                       str(gui.n4) + "," + str(gui.n5) + "," + str(gui.n6) + "," +\
                       str(gui.n7) + "," + str(gui.n8)
-            send_msg(request_queue_url, message)
 
+            send_average_request(request_queue, message)
+            
             gui.response = "Waiting for response..."
             gui.widgets["Go"].setEnabled(False)  # Disable the go button while waiting for a response from worker
             gui.execute_in_background(  # Execute the queue monitoring funciton in a background thread as to not block the UI thread
                 wait_for_response,
-                args=[response_queue_url],
+                args=[response_queue],
                 callback=on_response_received
             )
             
     
 
-def send_msg(queue_url, msg):
-    sqs_response = clientSQS.send_message(
-        QueueUrl=queue_url,
-        MessageBody=msg
+def send_average_request(queue, msg):
+    sqs_response = queue.send_message(
+        MessageBody=msg,
+        MessageAttributes={
+            "RequestType" : {
+                "StringValue" : "Average",
+                "DataType" : "String"
+            }
+        }
     )
 
 
-def wait_for_response(queue_url):
+def wait_for_response(queue):
     print("Waiting for response...")
-    
-    while True:
-        sqs_response = clientSQS.receive_message(
-            QueueUrl=queue_url,
+    output = "?"
+    while output == "?":
+        time.sleep(1)  # Dont fetch too often, or else I'm going to run out of AWS credits
+        messages = queue.receive_messages(
             MaxNumberOfMessages=1,
             MessageAttributeNames=['All']
         )
-        
-        if 'Messages' in sqs_response:
-            message = sqs_response['Messages'][0]
-            print("Response @ " + datetime.now().strftime("%H:%M:%S") +
-                  ": " + message['Body'])
-
-            clientSQS.delete_message(
-                QueueUrl=queue_url,
-                ReceiptHandle=message['ReceiptHandle']
-            )
+        for message in messages:
+            #print("Response @ " + datetime.now().strftime("%H:%M:%S") + ": " + message.body)
+            output = message.body
+            message.delete()
             break
-
-    return message['Body']
+        
+    return output
 
 
 def on_response_received(gui, response_value):

@@ -4,21 +4,20 @@
 # Worker side of the Web Queue Worker architecture
 
 import boto3
+import time
 from datetime import datetime
 
 
 def main():
-    global clientSQS, clientS3
-    clientSQS = boto3.client('sqs')
-    clientS3 = boto3.client('s3')
-    
-    request_queue_url = clientSQS.get_queue_url(QueueName='request_queue')['QueueUrl']
-    response_queue_url = clientSQS.get_queue_url(QueueName='response_queue')['QueueUrl']
+    sqs = boto3.resource('sqs')
+    s3 = boto3.resource('s3')
+
+    request_queue = sqs.get_queue_by_name(QueueName='request_queue')
+    response_queue = sqs.get_queue_by_name(QueueName='response_queue')
+    bucket = s3.Bucket('julgio-cli-bucket')
+        
     print("Julien's worker script. Calculates the average of any list of values sent")
-    print("through Amazon SQS. (Press Ctrl+Z to quit at any time)\n")
-    print("Request queue URL: " + request_queue_url)
-    print("Response queue URL: " + response_queue_url)
-    print('')
+    print("through Amazon SQS. (Press Ctrl+C to quit at any time)\n")
 
     # Wait for request
     just_processed_messages = True
@@ -26,51 +25,53 @@ def main():
         if just_processed_messages:
             just_processed_messages = False
             print("Waiting for messages...")
-        
-        messages = clientSQS.receive_message(
-            QueueUrl=request_queue_url,
-            MaxNumberOfMessages=10
-        )
-        if 'Messages' in messages:
-            for message in messages['Messages']: # Get the messages in queue
-                body = message['Body']
 
-                # Process data
+        
+        time.sleep(1)  # Dont fetch too often, or else I'm going to run out of AWS credits
+        messages = request_queue.receive_messages(
+            MessageAttributeNames=["RequestType"],
+            MaxNumberOfMessages=1
+        )
+        for message in messages: # Get the messages in queue
+            body = message.body
+            request_type = message.message_attributes["RequestType"]["StringValue"]
+
+            # Process data
+            if request_type == "Average":
                 total = 0.0
                 for s in body.split(','):
                     total += float(s)
                 average = total / len(body.split(','))
-                
+
                 # Make a response
-                send_msg(response_queue_url, str(average))
+                send_msg(response_queue, str(average))
+                log_data = "Msg received @ " + datetime.now().strftime("%H:%M:%S") +
+                  ": " + body + ". Response => " + str(average) + "\n"
+            else:
+                # This is never supposed to happen
+                print("/!\\ Error, request type unknown : '" + request type + "'")
+                log_data = ""
                 
-                # Delete the message from the queue as to not process it again
-                clientSQS.delete_message(
-                    QueueUrl=request_queue_url,
-                    ReceiptHandle=message['ReceiptHandle']
-                )
+            # Get log file from S3
+            bucket.download_file('log.txt', 'log_downloaded.txt')
 
-                # Get log file from S3
-                clientS3.download_file('julgio-cli-bucket', 'log.txt', 'log.txt')
+            # Update log
+            with open('log_downloaded.txt', 'a') as f:
+                f.write(log_data)
 
-                # Update log
-                with open('log.txt', 'a') as f:
-                    f.write("Msg received @ " + datetime.now().strftime("%H:%M:%S") +
-                      ": " + message['Body'] + ". Response => " + str(average) + "\n")
-                
-                with open('log.txt', 'r') as f:
-                    print(f.read())
-                
-                # Push log on S3 bucket
-                clientS3.upload_file('log.txt', 'julgio-cli-bucket', 'log.txt')
-                
+            # Push log on S3 bucket
+            bucket.upload_file('log_downloaded.txt', 'log.txt')
+
+
+            # Delete the message from the queue as to not process it again
+            message.delete()
+
             just_processed_messages = True
             
 
 
-def send_msg(queue_url, msg):
-    sqs_response = clientSQS.send_message(
-        QueueUrl=queue_url,
+def send_msg(queue, msg):
+    sqs_response = queue.send_message(
         MessageBody=msg
     )
 
