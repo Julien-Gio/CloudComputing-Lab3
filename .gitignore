@@ -123,3 +123,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Other individual files
+src/worker/instance_setup_commands.txt
+src/worker/log_downloaded.txt
