@@ -44,12 +44,29 @@ def main():
                 average = total / len(body.split(','))
 
                 # Make a response
-                send_msg(response_queue, str(average))
-                log_data = "Msg received @ " + datetime.now().strftime("%H:%M:%S") +
-                  ": " + body + ". Response => " + str(average) + "\n"
+                send_msg(response_queue, str(average), "Average")
+                log_data = "Msg received @ " + datetime.now().strftime("%H:%M:%S") + \
+                           ": " + body + ". Response => " + str(average) + "\n"
+
+            elif request_type == "ImageEffect":
+                filename = body.split(',')[0]
+                effect_num = body.split(',')[1]
+                # Download image
+                bucket.download_file(filename, "img_downloaded.jpg")
+
+                # Apply effect
+                # TODO
+                
+                # Upload image
+                bucket.upload_file("img_downloaded.jpg", filename)
+                
+                # Send response message
+                send_msg(response_queue, filename, "ImageEffect")
+                log_data = "Msg recieved @ " + datetime.now().strftime("%H:%M:%S") + \
+                           ": " + body + ". Effect " + effect_num + " applied\n"
             else:
                 # This is never supposed to happen
-                print("/!\\ Error, request type unknown : '" + request type + "'")
+                print("/!\\ Error, request type unknown : '" + request_type + "'")
                 log_data = ""
                 
             # Get log file from S3
@@ -70,9 +87,15 @@ def main():
             
 
 
-def send_msg(queue, msg):
+def send_msg(queue, msg, response_type):
     sqs_response = queue.send_message(
-        MessageBody=msg
+        MessageBody=msg,
+        MessageAttributes={
+            "ResponseType" : {
+                "StringValue" : response_type,
+                "DataType" : "String"
+            }
+        }
     )
 
 
