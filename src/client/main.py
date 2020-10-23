@@ -6,20 +6,34 @@
 import boto3
 import time
 from datetime import datetime
-from guietta import Gui, _, III
+from guietta import Gui, _, III, ___, HSeparator, VSeparator
+from PySide2.QtGui import QPixmap
 
 
 def main():
     sqs = boto3.resource('sqs')
+    s3 = boto3.resource('s3')
     
     # Get the queue urls
     request_queue = sqs.get_queue_by_name(QueueName='request_queue')
     response_queue = sqs.get_queue_by_name(QueueName='response_queue')
+    bucket = s3.Bucket('julgio-cli-bucket')
+    
     print('AWS connection done. Starting application...')
 
-    gui = Gui([ "Enter numbers:", "__n1__"  , "__n2__", "__n3__", "__n4__", ["Go"] ],
-              [ III             , "__n5__"  , "__n6__", "__n7__", "__n8__", III    ],
-              [ "Result: "      , "response", _       , _       , _       , _      ])
+    curr_img = 1
+
+    gui = Gui([ "Enter numbers:", _             , _         , _           , _ ],
+              [ "__n1__"        , "__n2__"      , _         , _           , _ ],
+              [ "__n3__"        , "__n4__"      , _         , _           , _ ],
+              [ "__n5__"        , "__n6__"      , _         , _           , _ ],
+              [ "__n7__"        , "__n8__"      , _         , _           , _ ],
+              [ ["Go"]          , ___           , _         , _           , _ ],
+              [ "Average: "     , "response"    , _         , _           , _ ],
+              [ HSeparator      , ___           , ___       , ___         , ___ ],
+              [ ("img1.jpg", "img"), ___        , VSeparator, ("img1.jpg", "img2"), ___ ],
+              [ (["<"], "prev") ,([">"], "next"), III       , ["Effect 1"], ["Effect 2"] ])
+    
     
     gui.title("Julien's Cloud Computing Lab3")
     gui.window().resize(500, 100)
@@ -48,8 +62,16 @@ def main():
                 args=[response_queue],
                 callback=on_response_received
             )
-            
-    
+        if name == "prev":  # Image precedente
+            curr_img -= 1
+            if curr_img == 0:
+                curr_img = 4
+            gui.widgets["img"].setPixmap(QPixmap("./img" + str(curr_img) + ".jpg"))
+        if name == "next":  # Image suivante
+            curr_img += 1
+            if curr_img == 5:
+                curr_img = 1
+            gui.widgets["img"].setPixmap(QPixmap("./img" + str(curr_img) + ".jpg"))
 
 def send_average_request(queue, msg):
     sqs_response = queue.send_message(
