@@ -30,7 +30,7 @@ def main():
               [ "__n5__"           , "__n6__"      , _         , _    , _ ],
               [ "__n7__"           , "__n8__"      , _         , _    , _ ],
               [ ["Go"]             , ___           , _         , _    , _ ],
-              [ "Average: "        , "response"    , _         , _    , ___ ],
+              [ "Average: "        , "response"    , _         , _    , _ ],
               [ HSeparator         , ___           , ___       , ___  , ___ ],
               [ ("img1.jpg", "img"), ___           , VSeparator, ("img1.jpg", "img2"), ___ ],
               [ (["<"], "prev")    ,([">"], "next"), III       , ["Effect 1"], ["Effect 2"] ])
