@@ -6,6 +6,9 @@
 import boto3
 import time
 from datetime import datetime
+from skimage.io import imread, imsave
+from numpy import flipud, uint8
+
 
 
 def main():
@@ -33,6 +36,7 @@ def main():
             MaxNumberOfMessages=1
         )
         for message in messages: # Get the messages in queue
+            print("Processing data...")
             body = message.body
             request_type = message.message_attributes["RequestType"]["StringValue"]
 
@@ -55,7 +59,17 @@ def main():
                 bucket.download_file(filename, "img_downloaded.jpg")
 
                 # Apply effect
-                # TODO
+                if effect_num == "1":
+                    # Black and white effect
+                    bw_img = imread("img_downloaded.jpg", as_gray=True)
+                    bw_img = bw_img.astype(uint8)
+                    imsave("img_downloaded.jpg", bw_img)
+                elif effect_num == "2":
+                    # Flip the image
+                    flip_img = imread("img_downloaded.jpg")
+                    flip_img = flipud(flip_img)
+                    flip_img = flip_img.astype(uint8)
+                    imsave("img_downloaded.jpg", flip_img)
                 
                 # Upload image
                 bucket.upload_file("img_downloaded.jpg", filename)
