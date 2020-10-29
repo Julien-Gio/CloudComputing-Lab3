@@ -52,11 +52,10 @@ With our instance ready to go, we must now start it and execute the worker scrip
 Here are the different steps in my bash script.
 
 ### Step 1) Passing the lastest version of the script and credentials
-Obviously the instance must receive the python code to be able to run it. Also, for the script to be able to comminicate with the SQS and S3 buckets, it needs the latest AWS credentials of my account.
-For now we store these files as strings in two different variables. We will then paste them in our instance at a later point (see step 3):
+For the script to be able to comminicate with the SQS and S3 buckets, it needs the latest AWS credentials of my account.
+For now we store this file as a string in a variable. We will then paste it in our instance at a later point (see step 3):
 ```bash
 credentials=$( cat "[path to credentials]" )
-code=$( cat "[path to worker script]" )
 ```
 
 ### Step 2) Starting the instance
@@ -75,7 +74,7 @@ First, we need the instance's public DNS. You can see it's strucutre on the firs
 
 Finally, we need the associated SSH key.
 
-Then we send the commands to update the credentials, then the worker code, and of course execute the worker script.
+Then we send the commands to update the credentials and of course execute the worker script.
 ```bash
 myarg="ec2-user@ec2-${ip//./-}.compute-1.amazonaws.com"
 
@@ -84,7 +83,6 @@ ssh -i "myKey.pem" $myarg << EOF
 
 # Instance commands
 echo "$credentials" > ~/.aws/credentials
-echo "$code" > ~/lab3/main.py
 python3 ~/lab3/main.py
 
 # End of connection
