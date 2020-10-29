@@ -45,7 +45,7 @@ def main():
                 numbers = []
                 for s in body.split(','):
                     numbers.append(float(s))
-                mediane_val = median(numbers)
+                median_val = median(numbers)
                 mean_val = mean(numbers)
                 min_val = ma.min(numbers)
                 max_val = ma.max(numbers)
