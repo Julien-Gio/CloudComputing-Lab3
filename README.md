@@ -99,6 +99,7 @@ You can see the full script in `init_script.sh`. We are now ready to use our cli
 # Features
 ## Calculating the average
 In the top section of the UI, a user can fill in 8 values. By pressing "Go", a message is sent to the worker to calculate the average of those values. While waiting for the result, the interface simply displays "Waiting for response...": 
+
 ![img](https://github.com/Julien-Gio/CloudComputing-Lab3/blob/master/img/UI_average_sending.png?raw=true)
 
 Then, once the worker is done, the appropriate value is displayed.
