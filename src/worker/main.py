@@ -62,7 +62,7 @@ def main():
                 if effect_num == "1":
                     # Black and white effect
                     bw_img = imread("img_downloaded.jpg", as_gray=True)
-                    bw_img = bw_img.astype(uint8)
+                    # bw_img = bw_img.astype(uint8) # Ne marche que sous W10 :/
                     imsave("img_downloaded.jpg", bw_img)
                 elif effect_num == "2":
                     # Flip the image
