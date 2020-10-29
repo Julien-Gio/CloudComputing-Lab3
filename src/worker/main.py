@@ -7,7 +7,7 @@ import boto3
 import time
 from datetime import datetime
 from skimage.io import imread, imsave
-from numpy import flipud, uint8
+from numpy import flipud, uint8, median, mean, ma
 
 
 
@@ -42,15 +42,19 @@ def main():
 
             # Process data
             if request_type == "Average":
-                total = 0.0
+                numbers = []
                 for s in body.split(','):
-                    total += float(s)
-                average = total / len(body.split(','))
-
+                    numbers.append(float(s))
+                mediane_val = median(numbers)
+                mean_val = mean(numbers)
+                min_val = ma.min(numbers)
+                max_val = ma.max(numbers)
+                
                 # Make a response
-                send_msg(response_queue, str(average), "Average")
+                answer = str(median_val) + "," + str(mean_val) + "," + str(min_val) + "," + str(max_val)
+                send_msg(response_queue, answer, "Average")
                 log_data = "Msg received @ " + datetime.now().strftime("%H:%M:%S") + \
-                           ": " + body + ". Response => " + str(average) + "\n"
+                           ": " + body + ". Response => " + answer + "\n"
 
             elif request_type == "ImageEffect":
                 filename = body.split(',')[0]

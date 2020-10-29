@@ -24,21 +24,23 @@ def main():
 
     curr_img = 1
 
-    gui = Gui([ "Enter numbers:"   , _             , _         , _    , _ ],
-              [ "__n1__"           , "__n2__"      , _         , _    , _ ],
-              [ "__n3__"           , "__n4__"      , _         , _    , _ ],
-              [ "__n5__"           , "__n6__"      , _         , _    , _ ],
-              [ "__n7__"           , "__n8__"      , _         , _    , _ ],
-              [ ["Go"]             , ___           , _         , _    , _ ],
-              [ "Average: "        , "response"    , _         , _    , _ ],
-              [ HSeparator         , ___           , ___       , ___  , ___ ],
+    gui = Gui([ "Enter numbers:"   , _             , _         , _         , _ ],
+              [ "__n1__"           , "__n2__"      , _         , "Median:" , "median_val" ],
+              [ "__n3__"           , "__n4__"      , _         , "Mean:"   , "mean_val" ],
+              [ "__n5__"           , "__n6__"      , _         , "Min:"    , "min_val" ],
+              [ "__n7__"           , "__n8__"      , _         , "Max:"    , "max_val" ],
+              [ ["Go"]             , ___           , _         , _         , _ ],
+              [ HSeparator         , ___           , ___       , ___       , ___ ],
               [ ("img1.jpg", "img"), ___           , VSeparator, ("img1.jpg", "img2"), ___ ],
               [ (["<"], "prev")    ,([">"], "next"), III       , ["Effect 1"], ["Effect 2"] ])
     
     
     gui.title("Julien's Cloud Computing Lab3")
     gui.window().resize(500, 100)
-    gui.response = "."
+    gui.median_val = "."
+    gui.mean_val = "."
+    gui.min_val = "."
+    gui.max_val = "."
     gui.img_label = ""
 
     # Handle ui events (e.g. button presses)
@@ -57,8 +59,11 @@ def main():
                       str(gui.n7) + "," + str(gui.n8)
 
             send_average_request(request_queue, message)
-            
-            gui.response = "Waiting for response..."
+
+            gui.median_val = "Waiting for response..."
+            gui.mean_val = "Waiting for response..."
+            gui.min_val = "Waiting for response..."
+            gui.max_val = "Waiting for response..."
             gui.widgets["Go"].setEnabled(False)  # Disable the go button while waiting for a response from worker
 
             # Execute the queue monitoring funciton in a background thread as to not block the UI thread
@@ -160,7 +165,11 @@ def wait_for_response(queue):
 
 def on_response_received(gui, response_value, response_type):
     if response_type == "Average":
-        gui.response = response_value
+        values = response_value.split(',')
+        gui.median_val = values[0]
+        gui.mean_val = values[1]
+        gui.min_val = values[2]
+        gui.max_val = values[3]
         gui.widgets["Go"].setEnabled(True)  # The worker is done, give the hand back to the user
 
     elif response_type == "ImageEffect":
