@@ -21,14 +21,14 @@ The first step is to launch (create) the EC2 instance. We will use a pre-made ke
 aws ec2 run-instances --image-id "ami-0947d2ba12ee1ff75" --count 1 --instance-type t2.micro --key-name myKey --security-group-ids "sg-07ed9af48bea7190e"
 ```
 Then we need to get all the necesary libraries for the worker to run. Here are all the python libraries we need (and what for):
-* ```boto3``` : to easly interact with the AWS API.
-* ```wheel``` : needed to install scikit-image.
-* ```scikit-image```: for image processing (includes many other libraries like ```numpy``` by default).
+* `boto3` : to easly interact with the AWS API.
+* `wheel` : needed to install scikit-image.
+* `scikit-image`: for image processing (includes many other libraries like `numpy` by default).
 
 But we will also need the following:
-* ```python3``` : to run python scripts. Also comes with ```pip3```.
-* ```g++``` : necessary for ```scikit-image```.
-* ```python3-devel``` : necessary for ```scikit-image```.
+* `python3` : to run python scripts. Also comes with `pip3`.
+* `g++` : necessary for `scikit-image`.
+* `python3-devel` : necessary for `scikit-image`.
 
 Here are the commands:
 ```
@@ -65,7 +65,7 @@ ip=$( aws ec2 describe-instances --instance-ids "i-068d57622c916ab92" --query "R
 
 ### 3) Send commands to instance
 To send commands to the instance we will be using a Secure Shell connection. To establish a communcaiton, we need two things.
-First, we need ths instance's public DNS. You can see it's strucutre on the first line. (Note, the ip address looks like this "192.168.0.1", we use ```${ip//./-}``` to make it like so "192-168-0-1").
+First, we need ths instance's public DNS. You can see it's strucutre on the first line. (Note, the ip address looks like this "192.168.0.1", we use `${ip//./-}` to make it like so "192-168-0-1").
 Finaly, we need the associated key.
 Then we pass it the commands to update the credentials, the worker code, and execute it.
 ```bash
@@ -83,10 +83,10 @@ python3 ~/lab3/main.py
 EOF
 ```
 
-# The Client
-TODO
+# The UI
+![alt text](https://github.com/Julien-Gio/CloudComputing-Lab3/blob/master/img/UI_ex1.png?raw=true)
 
-# The Worker
+# Features
 TODO
 
 
