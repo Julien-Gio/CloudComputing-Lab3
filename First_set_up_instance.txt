@@ -1,0 +1,13 @@
+
+aws ec2 run-instances --image-id "ami-0947d2ba12ee1ff75" --count 1 --instance-type t2.micro --key-name myKey --security-group-ids "sg-07ed9af48bea7190e"
+
+
+# Commandes à éxecuter dans l'instance pour tout installer correctement
+sudo yum update
+sudo yum install python3 -y
+sudo yum install gcc -y
+sudo yum install gcc-c++ -y
+sudo yum install python3-devel -y
+sudo pip3 install boto3
+sudo pip3 install wheel
+sudo pip3 install scikit-image
