@@ -122,4 +122,4 @@ The same priciple is applyed to the image effect part of the UI.
 
 ---
 
-*Julien Giovinazzo*
+*October 29 2020 - Julien Giovinazzo*
