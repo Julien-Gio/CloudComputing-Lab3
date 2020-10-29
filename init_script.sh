@@ -9,7 +9,7 @@ code=$( cat "C:\Users\Julien Giovinazzo\Documents\Code\Python\FISE3_AWS_CloudCom
 aws ec2 start-instances --instance-ids "i-068d57622c916ab92"
 
 # Attendre 45 secondes le temps que l'instance s'initialise
-sleep 45
+sleep 4
 
 # Recuperer son adresse ip public pour s'y connecter en SSH
 ip=$( aws ec2 describe-instances --instance-ids "i-068d57622c916ab92" --query "Reservations[*].Instances[*].PublicIpAddress" --output text )
@@ -24,13 +24,9 @@ cd "C:\Users\Julien Giovinazzo\Documents\COURS\FISE3\Cloud Computing 2020-2021\A
 # Connexion SSH
 ssh -i "myKey.pem" $myarg << EOF
 
-# Commandes pour l'instance EC2
+  echo "$credentials" > ~/.aws/credentials
+  python3 ~/lab3/main.py
 
-echo "$credentials" > ~/.aws/credentials
-echo "$code" > ~/lab3/main.py
-python3 ~/lab3/main.py
-
-# Fin de notre connexion
 EOF
 
 echo "Done."
