@@ -98,11 +98,11 @@ You can see the full script in `init_script.sh`. We are now ready to use our cli
 
 # Features
 ## Calculating the average
-In the top section of the UI, a user can fill in 8 values. By pressing "Go", a message is sent to the worker to calculate the average of those values. While waiting for the result, the interface simply displays "Waiting for response...": 
+In the top section of the UI, a user can fill in 8 values. By pressing "Go", a message is sent to the worker to calculate the median, mean, min, and max of those values. While waiting for the result, the interface simply displays "Waiting for response...": 
 
 ![img](https://github.com/Julien-Gio/CloudComputing-Lab3/blob/master/img/UI_average_sending.png?raw=true)
 
-Then, once the worker is done, the appropriate value is displayed.
+Then, once the worker is done, the appropriate values are displayed.
 
 ## Applying effects to images
 Using the arrows in the bottom left of the UI, the user can choose an image of their liking. Then click on "Effect 1" or "Effect 2" to send a request to the worker.
@@ -117,7 +117,7 @@ Here are the two effects:
 ![img](https://github.com/Julien-Gio/CloudComputing-Lab3/blob/master/img/UI_effect2.png?raw=true)
 
 ## Other features
-Another small feature that is present in the software is that the UI prevents the user from sending multiple messages in parallel. For example, while waiting for the worker to calculate the average, the "Go" button will be disabled. It will be re-enabled once the worker has responded. This is because there is no guarente of order of the messages in the queue (we are using a Standard Queue).
+Another small feature that is present in the software is that the UI prevents the user from sending multiple messages in parallel. For example, while waiting for the worker to do calculations on the numerical values, the "Go" button will be disabled. It will be re-enabled once the worker has responded. This is because there is no guarente of order of the messages in the queue (we are using a Standard Queue).
 
 The same priciple is applyed to the image effect part of the UI.
 
