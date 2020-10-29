@@ -30,4 +30,3 @@ ssh -i "myKey.pem" $myarg << EOF
 EOF
 
 echo "Done."
-read t
