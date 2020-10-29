@@ -127,3 +127,4 @@ dmypy.json
 # Other individual files
 src/worker/instance_setup_commands.txt
 src/worker/log_downloaded.txt
+src/client/img_with_effect.jpg
