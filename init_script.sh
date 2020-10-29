@@ -3,13 +3,12 @@
 
 # Copier les tokens de connexion AWS pour les mettre dans notre instance plus tard
 credentials=$( cat "C:\Users\Julien Giovinazzo\.aws\credentials" )
-code=$( cat "C:\Users\Julien Giovinazzo\Documents\Code\Python\FISE3_AWS_CloudComputing_lab3\CloudComputing-Lab3\src\worker\main.py" )
 
 # Lancer notre instance
 aws ec2 start-instances --instance-ids "i-068d57622c916ab92"
 
 # Attendre 45 secondes le temps que l'instance s'initialise
-sleep 4
+sleep 45
 
 # Recuperer son adresse ip public pour s'y connecter en SSH
 ip=$( aws ec2 describe-instances --instance-ids "i-068d57622c916ab92" --query "Reservations[*].Instances[*].PublicIpAddress" --output text )
